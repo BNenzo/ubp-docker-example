@@ -6,22 +6,47 @@
 
 version: "2"
 
+
 services:
   app:
     build: ./app
-    links:
+    depends_on:
       - db
     ports:
       - 8830:5000 #8830 - localhost del host, 5000 del container
-
-
+    environment:
+      NAME_HELLO: Enzo
+      DB_USER_NAME: root
+      DB_PASSWORD: root
+  app2:
+    build: ./app
+    depends_on:
+      - db
+    ports:
+      - 8831:5000 #8830 - localhost del host, 5000 del container
+    environment:
+      NAME_HELLO: Enzo2
+      DB_USER_NAME: root
+      DB_PASSWORD: root
   db:
     image: mysql:5.7
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_USER: username
-      MYSQL_PASSWORD: password
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: root
     volumes:
       - ./db:/docker-entrypoint-initdb.d/:ro
+      - ./../db:/var/lib/mysql
 
-
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: dev_pma
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8183:80
